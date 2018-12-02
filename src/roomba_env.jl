@@ -158,6 +158,7 @@ const BumperPOMDP = RoombaPOMDP{Bumper, Bool}
 const LidarPOMDP = RoombaPOMDP{Lidar, Float64}
 const DiscreteLidarPOMDP = RoombaPOMDP{DiscreteLidar, Int}
 
+
 # access the mdp of a RoombaModel
 mdp(e::RoombaMDP) = e
 mdp(e::RoombaPOMDP) = e.mdp
@@ -172,6 +173,7 @@ RoombaPOMDP(;sensor=Bumper(), mdp=RoombaMDP()) = RoombaPOMDP(sensor,mdp)
 
 # function to determine if there is contact with a wall
 wall_contact(e::RoombaModel, state) = wall_contact(mdp(e).room, state[1:2])
+# wall_contact(e::RoombaModel, state) = wall_contact(mdp(e).room, state)
 
 POMDPs.actions(m::RoombaModel) = mdp(m).aspace
 POMDPs.n_actions(m::RoombaModel) = length(mdp(m).aspace)
@@ -330,14 +332,18 @@ end
 
 
 # defines reward function R(s,a,s')
+# function POMDPs.reward(m::RoombaModel,
+#                 s::AbstractVector{Float64}, 
+#                 a::AbstractVector{Float64},
+#                 sp::AbstractVector{Float64})
+
 function POMDPs.reward(m::RoombaModel,
                 s::AbstractVector{Float64}, 
-                a::AbstractVector{Float64},
-                sp::AbstractVector{Float64})
+                a::AbstractVector{Float64})
     
     # penalty for each timestep elapsed
     cum_reward = mdp(m).time_pen
-
+    sp = transition(m, s, a).val
     # penalty for bumping into wall (not incurred for consecutive contacts)
     previous_wall_contact = wall_contact(m,s)
     current_wall_contact = wall_contact(m,sp)
