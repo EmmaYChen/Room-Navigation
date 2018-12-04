@@ -349,7 +349,10 @@ function POMDPs.reward(m::RoombaModel,
     # penalty for bumping into wall (not incurred for consecutive contacts)
     previous_wall_contact = wall_contact(m,s)
     current_wall_contact = wall_contact(m,sp)
-    if(!previous_wall_contact && current_wall_contact)
+    
+    if(previous_wall_contact && current_wall_contact)
+        cum_reward += mdp(m).contact_pen - 2.0
+    else
         cum_reward += mdp(m).contact_pen
     end
 
