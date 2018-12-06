@@ -1,0 +1,48 @@
+using Statistics
+
+total_rewards = []
+success_rewards = []
+total_time_steps = []
+success_time_steps = []
+num_success = 0
+num_seeds = 5
+
+for exp = 1:num_seeds
+    try
+        println(string(exp))
+        Random.seed!(exp)
+        #  refine       
+        p = ToEnd(0) 
+        num_step = 0
+        traj_rewards = 0
+        for step in stepthrough(m, p, belief_updater, max_steps = 100)
+            traj_rewards += step.r
+            num_step += 1
+            if step.sp[4] == 1.0
+                println("reached goal")
+                num_success += 1
+                push!(success_time_steps,num_step)
+                push!(success_time_steps, num_step)
+                push!(success_rewards, traj_rewards)
+                break
+            end
+        end
+        push!(total_rewards, traj_rewards)
+        push!(total_time_steps,num_step)
+    catch Exception
+        continue
+    end
+end
+
+success_rate = 1.0 * (num_success)/num_seeds
+mean_reward = mean(total_rewards)
+reward_std = std(total_rewards)/sqrt(5)
+success_score = success_rate * mean_reward
+mean_success_time_steps = mean(success_time_steps)
+mean_total_time_steps = mean(total_time_steps)
+    
+@printf("Percent that reached goal: %.3f%% \n", success_rate * 100)
+@printf("Mean Total Reward: %.3f, StdErr Total Reward: %.3f \n", mean_reward, reward_std)
+@printf("Score: %.3f \n", success_score)
+@printf("Mean Total Time Steps: %.3f \n", mean_total_time_steps)
+@printf("Mean Success Time Steps: %.3f \n", mean_success_time_steps)
