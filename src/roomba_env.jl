@@ -352,9 +352,17 @@ function POMDPs.reward(m::RoombaModel,
     
     if(previous_wall_contact && current_wall_contact)
         cum_reward += mdp(m).contact_pen - 2.0
-    else
+    elseif current_wall_contact
         cum_reward += mdp(m).contact_pen
     end
+    
+    cum_reward -= 0.001 * ((15 - s.x) + abs(s.y))
+    
+#     if s.y < -5
+#         cum_reward -= abs((wrap_to_pi(s.theta) - pi/2.0)) * 0.01
+#     else
+#         cum_reward -= abs((s.theta))*0.01
+#     end
 
     # terminal rewards
     cum_reward += mdp(m).goal_reward*(sp.status == 1.0)
